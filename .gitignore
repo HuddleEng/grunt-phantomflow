@@ -1,0 +1,6 @@
+
+npm-debug.log
+tmp
+node_modules
+/report/**/*
+/report/data.js
