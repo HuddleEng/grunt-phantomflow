@@ -29,7 +29,7 @@ var files = casper.cli.get('flowtests') || "";
 var novisuals = casper.cli.get('novisuals');
 
 var treeOutputRoot =  casper.cli.get('flowoutputroot'); // see phantomFlowAdaptor
-var xUnitOutputRoot =  casper.cli.get('flowxunitoutputroot') || "_report/"; // see xUnit.js
+var xUnitOutputRoot =  casper.cli.get('flowxunitoutputroot'); // see xUnit.js
 
 var visualDebugRoot = casper.cli.get('flowvisualdebugroot'); // see phantomFlowAdaptor
 var visualTestsRoot = casper.cli.get('flowvisualsroot'); // see phantomCSSAdaptor

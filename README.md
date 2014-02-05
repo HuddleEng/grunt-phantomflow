@@ -81,7 +81,7 @@ Location of screeshots generated during the test run.  Useful for seeing what's 
 
 #### options.includes
 Type: `String`
-Default value: `'/tests'`
+Default value: `'/includes'`
 
 The home of your scripts to help testing.  All includes will be evaluated in the PhantomJs global space. ** Note, these are not module includes.
 

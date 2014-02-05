@@ -1,20 +1,12 @@
+'use strict';
+
 /*
- * grunt-flow
+ * grunt-testflow
  * homepage
  *
- * Copyright (c) 25 Nov 2013 James Cryer / Huddle
+ * Copyright (c) 25 Nov 2013 Huddle
  * Licensed under The MIT License (MIT).
  */
-
-/*
-Graphs
-http://mbostock.github.io/d3/talk/20111018/tree.html
-/http://bl.ocks.org/mbostock/5944371
-http://bl.ocks.org/kerryrodden/7090426
-http://bl.ocks.org/mbostock/4063550
-*/
-
-'use strict';
 
 module.exports = function(grunt) {
 
@@ -49,7 +41,7 @@ module.exports = function(grunt) {
 
 	}
 
-	grunt.registerMultiTask('flow', 'this is something', function() {
+	grunt.registerMultiTask('testflow', 'UI testing with user flows', function() {
 
 		if(this.target === 'report'){
 			_.bind(showReport, this)();
@@ -69,7 +61,7 @@ module.exports = function(grunt) {
 		var args = [path.join(bootstrapPath, 'start.js')];
 		var done = this.async();
 		var files = _.map(grunt.file.expand([tests + '/**/*.test.js']), function(file){ return path.relative(tests, file); });
-		var threads = grunt.option('threads') || 4;
+		var threads = grunt.option('threads') || this.data.threads || 4;
 		var earlyExit = typeof grunt.option('earlyexit') === 'undefined' ? true : grunt.option('earlyexit');
 		var threadCompletionCount = 0;
 		var fileGroups;
