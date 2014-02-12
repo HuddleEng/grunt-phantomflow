@@ -4,7 +4,7 @@
  * grunt-testflow
  * homepage
  *
- * Copyright (c) 25 Nov 2013 Huddle
+ * Copyright (c) 2014 Huddle
  * Licensed under The MIT License (MIT).
  */
 
@@ -50,58 +50,118 @@ module.exports = function(grunt) {
 
 		var time = Date.now();
 
-		var optionTest = grunt.option('test');
+		var filterTests = grunt.option('test');
 		var optionDebug = grunt.option('debug');
 
 		var libsPath = path.join(__dirname, '..', 'libs');
 		var bootstrapPath = path.join(__dirname, '..', 'bootstrap');
 		var casperPath = path.join( libsPath, 'casperjs.bat');
-		var includes = path.resolve(this.data.includes || '/includes');
-		var tests = path.resolve(this.data.tests || '/tests');
-		var args = [path.join(bootstrapPath, 'start.js')];
-		var done = this.async();
-		var files = _.map(grunt.file.expand([tests + '/**/*.test.js']), function(file){ return path.relative(tests, file); });
+		
+		var includes = path.resolve(this.data.includes || 'include');
+		var tests = path.resolve(this.data.tests || 'test') + '/';
+		var results = path.resolve(this.data.results || 'test-results');
+	
+		var files;
+		
 		var threads = grunt.option('threads') || this.data.threads || 4;
-		var earlyExit = typeof grunt.option('earlyexit') === 'undefined' ? true : grunt.option('earlyexit');
+		
+		/*
+			Set to false if you do not want the tests to return on the first failure
+		*/
+		var earlyExit = typeof grunt.option('earlyexit') === 'undefined' ? false : grunt.option('earlyexit');
+		
 		var threadCompletionCount = 0;
 		var fileGroups;
 
 		var dontDoVisuals = grunt.option('novisuals');
 
+		var args = [];
+		var done = this.async();
+		
+		var visualTestsPath = tests + '/visuals/';
+
+		var dataPath = results + '/data/';
+		var xUnitPath = results + '/xunit/';
+		var debugPath = results + '/debug/';
+		var visualResultsPath = results + '/visuals/';
+
 		function changeSlashes(str){
 			return str.replace(/\\/g, '/');
 		}
 
-		if( optionDebug === 2 ){
-			earlyExit = false; // Don't abort early when debugging with screenshots
+		function writeLog(filename, log, exit){
+			var path = results +  '/log/' + filename;
+			fs.writeFile( path, log, function(){
+				console.log((" Please take a look at the error log for more info '"+path+"'").bold.yellow);
+				if(exit){
+					done();
+				}
+			});
 		}
 
-		grunt.file.expand([this.data.visualTests + '/**/*.fail.png', this.data.xUnitOutput + '/*.xml', this.data.flowTreeOutput]).forEach(function(file){
-			grunt.file.delete(file);
-		});
+		grunt.file.expand(
+			[
+				visualResultsPath + '/**/*.fail.png', 
+				xUnitPath + '/*.xml', 
+				dataPath + '/**/*.js'
+			]
+		).forEach(
+			function(file){
+				grunt.file.delete(file);
+			}
+		);
 
-		if(optionTest){
-			files = _.filter(files, function(file){ return file.toLowerCase().indexOf( optionTest.toLowerCase() ) !== -1; });
+		/* 
+			Get the paths for all the tests
+		*/
+		files = _.map(
+			grunt.file.expand([tests + '/**/*.test.js']), 
+			function(file){ 
+				return path.relative(tests, file); 
+			}
+		);
+
+		console.log(files.length);
+
+		/*
+			Filter tests down to match specified string
+		*/
+		if(filterTests){
+			files = _.filter(files, function(file){ return file.toLowerCase().indexOf( filterTests.toLowerCase() ) !== -1; });
 			threads = 1;
 		}
 
+		/*
+			Stop if there are no tests
+		*/
 		if(files.length === 0){
 			done();
 		}
 
+		/*
+			Group the files for thread parallelization
+		*/
 		fileGroups = _.groupBy(files, function(val, index){ return index % threads; });
 
-		args.push('--flowincludes='+includes);
-		args.push('--flowtestsroot='+changeSlashes(tests));
-		args.push('--flowbootstraproot='+bootstrapPath);
-		args.push('--flowlibraryroot='+libsPath);
-		args.push('--flowoutputroot='+ (this.data.flowTreeOutput || '/data') );
-		args.push('--flowxunitoutputroot='+ (this.data.xUnitOutput || '/xunit') );
-		args.push('--flowvisualdebugroot='+ (this.data.visualDebug || '/debug') );
-		args.push('--flowvisualsroot='+changeSlashes(this.data.visualTests ||'/visualTests') );
-
+		/*
+			Setup arguments to be sent into PhantomJS
+		*/
+		args.push(path.join(bootstrapPath, 'start.js'));
+		args.push('--flowincludes='+ includes );
+		args.push('--flowtestsroot='+ changeSlashes(tests) );
+		args.push('--flowbootstraproot='+ bootstrapPath );
+		args.push('--flowlibraryroot='+ libsPath );
+		args.push('--flowoutputroot='+ dataPath );
+		args.push('--flowxunitoutputroot='+ xUnitPath );
+		args.push('--flowvisualdebugroot='+ debugPath );
+		args.push('--flowvisualstestroot='+ changeSlashes(visualTestsPath) );
+		args.push('--flowvisualsoutputroot='+ changeSlashes(visualResultsPath) );
 		args.push('--debug='+optionDebug);
 		
+		if( optionDebug === 2 ){
+			earlyExit = false;
+		}
+
 		if(dontDoVisuals){
 			args.push('--novisuals='+dontDoVisuals);
 		}
@@ -114,7 +174,7 @@ module.exports = function(grunt) {
 			var child;
 			var currentTestFile = '';
 			var stdoutStr = '';
-			var failFileName = 'flow_thread_error_'+index+'.log';
+			var failFileName = 'error_'+index+'.log';
 			
 			groupArgs.push('--flowtests='+changeSlashes(files.join(',')));
 
@@ -125,19 +185,14 @@ module.exports = function(grunt) {
 			}, function(error, stdout, code) {
 				
 				if(code !== 0 ){
-					console.log(('SOMETHING HIT THE FAN, threads aborted. Non-zero code ('+code+') returned.').red);
-					fs.writeFile( failFileName, stdoutStr, function(){
-						console.log(("Written error log to '"+failFileName+"'").bold.yellow);
-						if(earlyExit){
-							done();
-						}
-					});
+					console.log(('It broke, sorry. Threads aborted. Non-zero code ('+code+') returned.').red);
+					writeLog(failFileName, stdoutStr, earlyExit);
 				}
 
 				threadCompletionCount += 1;
 
 				if(threadCompletionCount === threads){
-					console.log( 'YAY! All the threads have completed. \n'.yellow );
+					console.log( 'All the threads have completed. \n'.yellow );
 					console.log( ('Completed in ' + (Date.now() - time) / 1000 + ' seconds.').bold.green );
 					done();
 				} else {
@@ -158,11 +213,8 @@ module.exports = function(grunt) {
 						console.log(('** '+currentTestFile).bold.red);
 						console.log(line.bold.red);
 
-						if(earlyExit){
-							fs.writeFile(failFileName, stdoutStr, function(){
-								console.log(("Written error log to '"+failFileName+"'").bold.yellow);
-								done();
-							});
+						if(earlyExit === true){
+							writeLog(failFileName, stdoutStr, true);
 						}
 
 					} else if (/PASS/.test(line)){

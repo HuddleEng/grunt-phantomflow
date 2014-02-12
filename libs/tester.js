@@ -1,4 +1,8 @@
 /*!
+ * ** This is a modified Tester API for grunt-testflow **
+ * ======================================================
+ *
+ *
  * Casper is a navigation utility for PhantomJS.
  *
  * Documentation: http://casperjs.org/
@@ -96,8 +100,6 @@ var Tester = function Tester(casper, options) {
     this.casper = casper;
 
     // public properties
-    this._setUp = undefined;
-    this._tearDown = undefined;
     this.aborted = false;
     this.executed = 0;
     this.currentTestFile = null;
@@ -194,7 +196,6 @@ var Tester = function Tester(casper, options) {
     
     function errorHandlerAndDone(error, backtrace) {
         errorHandler(error, backtrace);
-        //self.done();
     }
 
     [
@@ -900,110 +901,6 @@ Tester.prototype.bar = function bar(text, style) {
 };
 
 /**
- * Defines a function which will be executed before every test.
- *
- * @param  Function  fn
- */
-Tester.prototype.setUp = function setUp(fn) {
-    "use strict";
-    this._setUp = fn;
-};
-
-/**
- * Defines a function which will be executed after every test.
- *
- * @param  Function  fn
- */
-Tester.prototype.tearDown = function tearDown(fn) {
-    "use strict";
-    this._tearDown = fn;
-};
-
-/**
- * Starts a suite.
- *
- * Can be invoked different ways:
- *
- *     casper.test.begin("suite description", plannedTests, function(test){})
- *     casper.test.begin("suite description", function(test){})
- */
-Tester.prototype.begin = function begin() {
-    "use strict";
-    if (this.started && this.running)
-        return this.queue.push(arguments);
-
-    function getConfig(args) {
-        var config = {
-            setUp: function(){},
-            tearDown: function(){}
-        };
-
-        if (utils.isFunction(args[1])) {
-            config.test = args[1];
-        } else if (utils.isObject(args[1])) {
-            config = utils.mergeObjects(config, args[1]);
-        } else if (utils.isNumber(args[1]) && utils.isFunction(args[2])) {
-            config.planned = ~~args[1] || undefined;
-            config.test = args[2];
-        } else if (utils.isNumber(args[1]) && utils.isObject(args[2])) {
-            config.config = utils.mergeObjects(config, args[2]);
-            config.planned = ~~args[1] || undefined;
-        } else {
-            throw new CasperError('Invalid call');
-        }
-
-        if (!utils.isFunction(config.test))
-            throw new CasperError('begin() is missing a mandatory test function');
-
-        return config;
-    }
-
-    var description = arguments[0] || f("Untitled suite in %s", this.currentTestFile),
-        config = getConfig([].slice.call(arguments)),
-        next = function() {
-            config.test(this, this.casper);
-            if (this.options.concise)
-                this.casper.echo([
-                    this.colorize('PASS', 'INFO'),
-                    this.formatMessage(description),
-                    this.colorize(f('(%d test%s)',
-                                    config.planned,
-                                    config.planned > 1 ? 's' : ''), 'INFO')
-                ].join(' '));
-        }.bind(this);
-
-    if (!this.options.concise)
-        this.comment(description);
-
-    this.currentSuite = new TestCaseResult({
-        name: description,
-        file: this.currentTestFile,
-        config: config,
-        planned: config.planned || undefined
-    });
-
-    this.executed = 0;
-    this.running = this.started = true;
-
-    try {
-        if (config.setUp)
-            config.setUp(this, this.casper);
-
-        if (!this._setUp)
-            return next();
-
-        if (this._setUp.length > 0)
-            return this._setUp.call(this, next); // async
-
-        this._setUp.call(this);                  // sync
-        next();
-    } catch (err) {
-        this.processError(err);
-        this.done();
-    }
-};
-
-/**
  * Render a colorized output. Basically a proxy method for
  * `Casper.Colorizer#colorize()`.
  *
@@ -1026,68 +923,6 @@ Tester.prototype.comment = function comment(message) {
     this.casper.echo('# ' + message, 'COMMENT');
 };
 
-/**
- * Declares the current test suite done.
- *
- */
-Tester.prototype.done = function done() {
-    "use strict";
-    /*jshint maxstatements:20, maxcomplexity:20*/
-    var planned, config = this.currentSuite && this.currentSuite.config || {};
-
-    if (arguments.length && utils.isNumber(arguments[0])) {
-        this.casper.warn('done() `planned` arg is deprecated as of 1.1');
-        planned = arguments[0];
-    }
-
-    if (config && config.tearDown && utils.isFunction(config.tearDown)) {
-        try {
-            config.tearDown(this, this.casper);
-        } catch (error) {
-            this.processError(error);
-        }
-    }
-
-    var next = function() {
-        if (this.currentSuite && this.currentSuite.planned &&
-            this.currentSuite.planned !== this.executed + this.currentSuite.skipped &&
-            !this.currentSuite.failed) {
-            this.dubious(this.currentSuite.planned, this.executed, this.currentSuite.name);
-        } else if (planned && planned !== this.executed) {
-            // BC
-            this.dubious(planned, this.executed);
-        }
-        if (this.currentSuite) {
-            this.suiteResults.push(this.currentSuite);
-            this.currentSuite = undefined;
-            this.executed = 0;
-        }
-        this.emit('test.done');
-        this.casper.currentHTTPResponse = {};
-        this.running = this.started = false;
-        var nextTest = this.queue.shift();
-        if (nextTest) {
-            this.begin.apply(this, nextTest);
-        }
-    }.bind(this);
-
-    if (!this._tearDown) {
-        return next();
-    }
-
-    try {
-        if (this._tearDown.length > 0) {
-            // async
-            this._tearDown.call(this, next);
-        } else {
-            // sync
-            this._tearDown.call(this);
-            next();
-        }
-    } catch (error) {
-        this.processError(error);
-    }
-};
 
 /**
  * Marks a test as dubious, when the number of planned tests doesn't match the
@@ -1357,7 +1192,6 @@ Tester.prototype.processPhantomError = function processPhantomError(msg, backtra
             stack: backtrace
         }
     });
-    this.done();
 };
 
 /**
@@ -1504,7 +1338,6 @@ Tester.prototype.terminate = function(message) {
     if (message) {
         this.casper.warn(message);
     }
-    this.done();
     this.aborted = true;
     this.emit('tests.complete');
 };

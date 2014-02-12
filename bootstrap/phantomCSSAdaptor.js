@@ -7,8 +7,6 @@
 	var currentDescribe;
 	var currentFilename;
 	var count = 0; // because you might want to take multiple captures per each 'when'
-	var screenshotRoot = visualTestsRoot;
-	var isScenario = false;
 
 	casper.on('test.source', function(e){
 		if(!e.name){
@@ -38,7 +36,8 @@
 	phantomCSS.init({
 		libraryRoot: [libraryRoot, 'PhantomCSS'].join('/'),
 		hideElements: 'img, select',
-		screenshotRoot: screenshotRoot,
+		screenshotRoot: visualTestsRoot,
+		comparisonResultRoot: visualResultsRoot,
 		fileNameGetter: fileNameGetter,
 		onComplete: onComplete
 	});
@@ -58,26 +57,20 @@
 	function fileNameGetter(root, fileName){
 		var diffDir, origFile, diffFile;
 
-		if (isScenario) {
-			diffDir =  root + '/' + currentFilename;
-			origFile =  diffDir + '/' + (fileName || currentDescribe) +'.png';
-			diffFile =  diffDir + '/' + (fileName || currentDescribe) +'.diff.png';
-		} else {
-			var increment = count ? '.'+count : '';
-			diffDir =  root + '/' + currentFilename + '/' + currentDescribe;
-			origFile =  diffDir + '/' + currentWhen + increment +'.png';
-			diffFile =  diffDir + '/' + currentWhen + increment +'.diff.png';
-		}
+		var increment = count ? '.'+count : '';
+		diffDir =  root + '/' + currentFilename + '/' + currentDescribe;
+		origFile =  diffDir + '/' + currentWhen + increment +'.png';
+		diffFile =  diffDir + '/' + currentWhen + increment +'.diff.png';
 	
 		if ( !fs.isDirectory(diffDir) ){
 			fs.makeDirectory(diffDir);
 		}
 
-		casper.emit('phantomcss.screenshot', {path:origFile.replace(screenshotRoot,'')});
+		casper.emit('phantomcss.screenshot', {path:origFile.replace(visualTestsRoot,'')});
 
 		if(!fs.isFile(origFile)){
 			casper.test.info("return origfile");
-			casper.test.info("New screenshot created for " + (isScenario ? currentDescribe : currentWhen));
+			casper.test.info("New screenshot created for " + currentWhen);
 			return origFile;
 		} else {
 			casper.test.info("return diffile");
@@ -90,7 +83,7 @@
 
 		all.forEach(function(test){
 
-			var dir = test.filename.replace(screenshotRoot, '').split('/');
+			var dir = test.filename.replace(visualTestsRoot, '').split('/');
 			var when = dir.pop().split('.').shift();
 			var describe = dir.pop();
 			dir = dir.join('/');

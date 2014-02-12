@@ -1,23 +1,16 @@
-/* global phantom, casper, require */
+/* global phantom, require */
 
 var fs = require('fs');
-
 var shouldAbort = true;
-
-casper.options.pageSettings = {
-	loadImages:  true, // Must be true for PhantomCSS to work
-	loadPlugins: false,
-	XSSAuditingEnabled : true,
-	localToRemoteUrlAccessEnabled : true
-};
-
-casper.options.logLevel = 'debug';
-casper.options.verbose = false;
-casper.options.exitOnError = false;
 
 /*
 	Parse parameters
 */
+
+var casper = require('casper').create({
+	verbose: false,
+    logLevel: 'debug'
+});
 
 var debug = Number(casper.cli.get('debug')) || 0; //0|1|2
 var stopOnFail = casper.cli.get('stopOnFail');
@@ -32,10 +25,33 @@ var treeOutputRoot =  casper.cli.get('flowoutputroot'); // see phantomFlowAdapto
 var xUnitOutputRoot =  casper.cli.get('flowxunitoutputroot'); // see xUnit.js
 
 var visualDebugRoot = casper.cli.get('flowvisualdebugroot'); // see phantomFlowAdaptor
-var visualTestsRoot = casper.cli.get('flowvisualsroot'); // see phantomCSSAdaptor
+
+var visualTestsRoot = casper.cli.get('flowvisualstestroot'); // see phantomCSSAdaptor
+var visualResultsRoot = casper.cli.get('flowvisualsoutputroot'); // see phantomCSSAdaptor
 
 var emptyPage = pathJoin([ bootstrapRoot , 'empty.html']);
 
+/*
+	Setup and patch CasperJS
+*/
+
+var patchedTester = require( pathJoin([libraryRoot, 'tester.js']));
+
+var test;
+
+casper.__defineGetter__('test', function() {
+    if (!this._test) {
+        this._test = patchedTester.create(this);
+    }
+    return this._test;
+});
+
+casper.options.pageSettings = {
+	loadImages:  true, // Must be true for PhantomCSS to work
+	loadPlugins: false,
+	XSSAuditingEnabled: true,
+	localToRemoteUrlAccessEnabled: true
+};
 
 /*
 	Include core dependencies
@@ -115,9 +131,8 @@ casper.then(function(){
 casper.
 run(function() {
 	console.log('\n');
-	casper.test.done();
 	console.log('\nFini.');
-	casper.test.renderResults(true, 0);
+	phantom.exit(0);
 });
 
 
