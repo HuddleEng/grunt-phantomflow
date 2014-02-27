@@ -34,7 +34,7 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {
+  "dependencies": {
     "lodash": "~2.4.1",
     "colors": "~0.6.2",
     "connect": "~2.12.0",
