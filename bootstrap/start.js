@@ -32,19 +32,8 @@ var visualResultsRoot = casper.cli.get('flowvisualsoutputroot'); // see phantomC
 var emptyPage = pathJoin([ bootstrapRoot , 'empty.html']);
 
 /*
-	Setup and patch CasperJS
+	Setup CasperJS
 */
-
-var patchedTester = require( pathJoin([libraryRoot, 'tester.js']));
-
-var test;
-
-casper.__defineGetter__('test', function() {
-    if (!this._test) {
-        this._test = patchedTester.create(this);
-    }
-    return this._test;
-});
 
 casper.options.pageSettings = {
 	loadImages:  true, // Must be true for PhantomCSS to work
@@ -57,8 +46,8 @@ casper.options.pageSettings = {
 	Include core dependencies
 */
 
-var phantomCSS = require( pathJoin([libraryRoot, 'PhantomCSS', 'phantomcss.js']));
-var phantomFlow = require( pathJoin([libraryRoot, 'PhantomFlow', 'phantomFlow.js']));
+var phantomCSS = require( pathJoin([libraryRoot, 'libs', 'PhantomCSS', 'phantomcss.js']));
+var phantomFlow = require( pathJoin([libraryRoot, 'phantomFlow.js']));
 
 phantom.injectJs( pathJoin([bootstrapRoot, 'phantomCSSAdaptor.js']) );
 phantom.injectJs( pathJoin([bootstrapRoot, 'phantomFlowAdaptor.js']) );
@@ -109,9 +98,6 @@ if(files){
 
 
 casper.then(function(){
-	phantomCSS.update({
-		addLabelToFailedImage: false
-	});
 
 	console.log('TESTFILE', 'PhantomCSS');
 	casper.emit('test.source', {name:'PhantomCSS'});
@@ -119,7 +105,7 @@ casper.then(function(){
 	shouldAbort = false;
 
 	if(!novisuals){
-		phantomCSS.compareSession();	
+		phantomCSS.compareSession();
 	}
 	
 });
@@ -188,7 +174,7 @@ function pathJoin( arr ){
 
 function blackListRequests(){
 	casper.on('resource.requested', function(requestData, request) {
-		if(/.gif|.jpg|.png/.test(requestData.url)){
+		if(/.gif|.jpg|.png|!data:/.test(requestData.url) && !/data:/.test(requestData.url) ){
 			if(debug > 0){
 				console.log('Asset request has been aborted for ' + requestData.url);
 			}

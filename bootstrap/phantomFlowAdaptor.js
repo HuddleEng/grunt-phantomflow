@@ -5,7 +5,6 @@
 	var fs = require('fs');
 	var flowReportDir = treeOutputRoot || [fs.workingDirectory, 'flowReport'].join('/');
 
-	var casperAssert = casper.test.assert;
 	var capture = phantomCSS.screenshot;
 
 	var screenshotFolder = visualTestsRoot;

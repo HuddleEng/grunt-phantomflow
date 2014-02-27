@@ -38,7 +38,6 @@ module.exports = function(grunt) {
 
 		connect(connect.static(path.join(__dirname, '..', 'report'))).listen(9001);
 		open('http://localhost:9001');
-
 	}
 
 	grunt.registerMultiTask('testflow', 'UI testing with user flows', function() {
@@ -53,7 +52,7 @@ module.exports = function(grunt) {
 		var filterTests = grunt.option('test');
 		var optionDebug = grunt.option('debug');
 
-		var libsPath = path.join(__dirname, '..', 'libs');
+		var libsPath = path.join(__dirname, '..', 'node_modules', 'phantomflow');
 		var bootstrapPath = path.join(__dirname, '..', 'bootstrap');
 		var casperPath = path.join( libsPath, 'casperjs.bat');
 		

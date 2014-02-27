@@ -34,11 +34,12 @@
 	});
 
 	phantomCSS.init({
-		libraryRoot: [libraryRoot, 'PhantomCSS'].join('/'),
+		libraryRoot: [libraryRoot, 'libs', 'PhantomCSS'].join('/'),
 		hideElements: 'img, select',
 		screenshotRoot: visualTestsRoot,
 		comparisonResultRoot: visualResultsRoot,
 		fileNameGetter: fileNameGetter,
+		addLabelToFailedImage: false,
 		onComplete: onComplete
 	});
 
