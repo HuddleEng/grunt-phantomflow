@@ -1,6 +1,6 @@
 {
   "name": "grunt-testflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "UI Web testing with user flows",
   "homepage": "https://github.com/Huddle/grunt-testflow",
   "author": "",
@@ -40,7 +40,7 @@
     "connect": "~2.12.0",
     "open": "0.0.4",
     "grunt-contrib-connect": "~0.5.0",
-    "phantomflow": "~0.1.1"
+    "phantomflow": "~0.1.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
