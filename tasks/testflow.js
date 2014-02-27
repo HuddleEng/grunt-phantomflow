@@ -113,12 +113,14 @@ module.exports = function(grunt) {
 		/* 
 			Get the paths for all the tests
 		*/
-		files = _.map(
-			grunt.file.expand([tests + '/**/*.test.js']), 
-			function(file){ 
-				return path.relative(tests, file); 
+		files = _.filter(
+			grunt.file.expand([tests + '/**/*.test.js']),
+			function(file){
+				return grunt.file.isFile(file);
 			}
-		);
+		).map(function(file){
+			return path.relative(tests, file);
+		});
 
 		console.log(files.length);
 
