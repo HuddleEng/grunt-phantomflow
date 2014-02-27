@@ -2,6 +2,4 @@
 npm-debug.log
 tmp
 node_modules
-
-/report/data.js
-/report/tests/*
+test-results
