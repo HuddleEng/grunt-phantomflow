@@ -50,9 +50,9 @@ Show more logging: `grunt testflow:websitetests --debug=1`
 
 Save screenshots and show more logging: `grunt testflow:websitetests --debug=2`
 
-By default testflow will abort when a test fails, set the `earlyexit` parameter to false to allow all tests to complete.
+By default testflow will not abort when a test fails, set the `earlyexit` parameter to true stop the tests upon seeing the first failure.
 
-`grunt testflow:websitetests --earlyexit=false`
+`grunt testflow:websitetests --earlyexit=true`
 
 ### Overview
 In your project's Gruntfile, use either `grunt.initConfig( {} )` or `grunt.config.set( 'testflow', {} )`.
