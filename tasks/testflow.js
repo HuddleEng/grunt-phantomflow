@@ -84,6 +84,10 @@ module.exports = function(grunt) {
 		var debugPath = results + '/debug/';
 		var visualResultsPath = results + '/visuals/';
 
+		var loggedErrors = [];
+		var failCount = 0;
+		var passCount = 0;
+
 		function changeSlashes(str){
 			return str.replace(/\\/g, '/');
 		}
@@ -193,8 +197,18 @@ module.exports = function(grunt) {
 				threadCompletionCount += 1;
 
 				if(threadCompletionCount === threads){
-					console.log( 'All the threads have completed. \n'.yellow );
-					console.log( ('Completed in ' + (Date.now() - time) / 1000 + ' seconds.').bold.green );
+					console.log( 'All the threads have completed. \n'.grey );
+
+					loggedErrors.forEach(function(error){
+						console.log(('== '+error.file).white);
+						console.log(error.msg.bold.red);
+					});
+
+					console.log( 
+						('Completed '+(failCount+passCount) + ' tests in ' + Math.round((Date.now() - time) / 1000) + ' seconds. ') + 
+						(failCount + ' failed, ').bold.red + 
+						(passCount + ' passed. ').bold.green);
+
 					done();
 				} else {
 					console.log( 'A thread has completed. \n'.yellow );
@@ -211,17 +225,24 @@ module.exports = function(grunt) {
 					}
 
 					if(/FAIL/.test(line)){
-						console.log(('** '+currentTestFile).bold.red);
 						console.log(line.bold.red);
+
+						loggedErrors.push({
+							file: currentTestFile,
+							msg: line
+						});
+
+						failCount++;
 
 						if(earlyExit === true){
 							writeLog(failFileName, stdoutStr, true);
 						}
 
 					} else if (/PASS/.test(line)){
+						passCount++;
 						console.log(line.green);
 					} else if (/DEBUG/.test(line)){
-						console.log(line.bold.yellow);
+						console.log(line.yellow);
 					} else if(threads === 1){
 						console.log(line.white);
 					}

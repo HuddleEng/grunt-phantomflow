@@ -40,7 +40,10 @@
 		comparisonResultRoot: visualResultsRoot,
 		fileNameGetter: fileNameGetter,
 		addLabelToFailedImage: false,
-		onComplete: onComplete
+		onComplete: onComplete,
+		onPass: function(){},
+		onFail: function(){},
+		onTimeout: function(){}
 	});
 
 	phantomCSS.temporarilyEnableImages = function (callback){
@@ -96,8 +99,8 @@
 			});
 
 			if(test.fail){
-				console.log(test.mismatch + '% mismatch \n');
-				casper.test.fail('PhantomCSS ' + test.filename);
+				console.log('DEBUG PhantomCSS Detected visual mismatch of ' + test.mismatch + '%');
+				casper.test.fail('PhantomCSS ' + test.filename );
 			} else if(test.error){
 				console.log('');
 				casper.test.fail('PhantomCSS Error, diff without original? ' + test.filename);
