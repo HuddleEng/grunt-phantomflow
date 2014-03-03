@@ -13,7 +13,7 @@ var casper = require('casper').create({
 });
 
 var debug = Number(casper.cli.get('debug')) || 0; //0|1|2
-var stopOnFail = casper.cli.get('stopOnFail');
+
 var includes = casper.cli.get('flowincludes') || "";
 var testRoot = casper.cli.get('flowtestsroot') || "";
 var libraryRoot = casper.cli.get('flowlibraryroot') || "";
@@ -58,19 +58,6 @@ phantom.injectJs( pathJoin([bootstrapRoot, 'xUnit.js']) );
 */
 
 findIncludes( includes );
-
-/*
-	Random Casper stuff
-*/
-
-if(stopOnFail){
-	casper.test.on('fail', function(test){
-		casper.test.done();
-		console.log('\nStopped on first fail.');
-		casper.test.renderResults(true, 0);
-	});
-}
-
 
 blackListRequests();
 
