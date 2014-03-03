@@ -93,7 +93,14 @@ module.exports = function(grunt) {
 		}
 
 		function writeLog(filename, log, exit){
-			var path = results +  '/log/' + filename;
+			var path = results +  '/log/';
+			
+			if(!grunt.file.isDir(path)){
+				grunt.file.mkdir(path);
+			}
+
+			path = path + filename;
+
 			fs.writeFile( path, log, function(){
 				console.log((" Please take a look at the error log for more info '"+path+"'").bold.yellow);
 				if(exit){
