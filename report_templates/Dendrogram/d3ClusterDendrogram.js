@@ -80,7 +80,6 @@ function createD3ClusterDendrogram(root, config){
     node.append("circle")
         .attr("r", 4);
 
-
     var tooltip = d3.select("body")
       .append("div")
       .attr("class", "tooltip")
@@ -97,19 +96,16 @@ function createD3ClusterDendrogram(root, config){
         var _this = this;
         var failedScreenshot;
 
-        if(d.screenshot){
+        if(d.screenshot && d.screenshot.original){
 
-          d.screenshot = fileRoot + d.screenshot;
+          d.originalScreenshot = d.screenshot.original;
 
-          failedScreenshot = d.screenshot.replace('.png', '.fail.png');
+          if(d.screenshot.failure){
+            d.failedScreenshot = d.screenshot.failure;
+            d.latestScreenshot = d.screenshot.latest;
+            _this.setAttribute("class", _this.className.baseVal + ' screenshotFail');
+          }
 
-          $.get(failedScreenshot)
-            .success(function(){
-              d.failedScreenshot = failedScreenshot;
-              d.latestScreenshot = d.screenshot.replace('.png', '.diff.png');
-
-              _this.setAttribute("class", _this.className.baseVal + ' screenshotFail');
-            });
         }
       return !!d.screenshot;
       })
@@ -121,7 +117,7 @@ function createD3ClusterDendrogram(root, config){
             tooltipImg.attr("src", e.failedScreenshot);
           } else {
             tooltipText.text('Original/good image');
-            tooltipImg.attr("src", e.screenshot);
+            tooltipImg.attr("src", e.originalScreenshot);
           }
         }
         return tooltip.style("visibility", "visible");
@@ -159,9 +155,9 @@ function createD3ClusterDendrogram(root, config){
 
         if( tooltipImg.attr("src") === e.failedScreenshot ){
           tooltipText.text('Original/good image');
-          tooltipImg.attr("src", e.screenshot);
+          tooltipImg.attr("src", e.originalScreenshot);
 
-        } else if ( tooltipImg.attr("src") === e.screenshot ){
+        } else if ( tooltipImg.attr("src") === e.originalScreenshot ){
           tooltipText.text('Latest/bad image');
           tooltipImg.attr("src", e.latestScreenshot);
 

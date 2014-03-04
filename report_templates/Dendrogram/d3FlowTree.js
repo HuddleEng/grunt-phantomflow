@@ -103,21 +103,15 @@ function createD3Tree(root, config){
 			var _this = this;
 			var failedScreenshot;
 
-			if(d.screenshot){
-
-				d.screenshot = fileRoot + d.screenshot;
-
-				failedScreenshot = d.screenshot.replace('.png', '.fail.png');
-
-				$.get(failedScreenshot)
-					.success(function(){
-						d.failedScreenshot = failedScreenshot;
-						d.latestScreenshot = d.screenshot.replace('.png', '.diff.png');
-
-						_this.setAttribute("class", _this.className.baseVal + ' screenshotFail');
-					});
+			if(d.screenshot && d.screenshot.original){
+				d.originalScreenshot = d.screenshot.original;
+				if(d.screenshot.failure){
+					d.failedScreenshot = d.screenshot.failure;
+					d.latestScreenshot = d.screenshot.latest;  
+					_this.setAttribute("class", _this.className.baseVal + ' screenshotFail');
+				}
 			}
-		return !!d.screenshot;
+			return !!d.screenshot;
 		})
 		.classed('screenshot',true)
 		.on("mouseover", function(e){
@@ -127,7 +121,7 @@ function createD3Tree(root, config){
 					tooltipImg.attr("src", e.failedScreenshot);
 				} else {
 					tooltipText.text('Original/good image');
-					tooltipImg.attr("src", e.screenshot);
+					tooltipImg.attr("src", e.originalScreenshot);
 				}
 			}
 			return tooltip.style("visibility", "visible");
@@ -165,9 +159,9 @@ function createD3Tree(root, config){
 
 			if( tooltipImg.attr("src") === e.failedScreenshot ){
 				tooltipText.text('Original/good image');
-				tooltipImg.attr("src", e.screenshot);
+				tooltipImg.attr("src", e.originalScreenshot);
 
-			} else if ( tooltipImg.attr("src") === e.screenshot ){
+			} else if ( tooltipImg.attr("src") === e.originalScreenshot ){
 				tooltipText.text('Latest/bad image');
 				tooltipImg.attr("src", e.latestScreenshot);
 

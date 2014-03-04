@@ -51,7 +51,7 @@
 		});
 
 	casper.on('phantomcss.screenshot', function(e){
-		screenshotPath = screenshotFolder + e.path;
+		screenshotPath = e.path;
 	});
 
 	function safe(str){

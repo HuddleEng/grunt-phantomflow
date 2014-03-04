@@ -17,35 +17,9 @@ module.exports = function(grunt) {
 	var colors = require('colors');
 	var connect = require('connect');
 	var open = require('open');
-
-	function showReport(){
-		var data = {};
-		var done = this.async();
-
-		var datafilename = path.join(__dirname, '..', 'report', 'data.js');
-
-		grunt.file.delete(datafilename);
-
-		grunt.file.recurse(this.data.flowTreeOutput, function(abspath, rootdir, subdir, filename){
-			data[filename] = grunt.file.readJSON(abspath);
-		});
-
-		grunt.file.recurse(this.data.visualTests, function(abspath, rootdir, subdir, filename){
-			grunt.file.copy(abspath, path.join(__dirname, '..', 'report', abspath) );
-		});
-
-		grunt.file.write(datafilename, JSON.stringify(data));
-
-		connect(connect.static(path.join(__dirname, '..', 'report'))).listen(9001);
-		open('http://localhost:9001');
-	}
+	var datauri = require('datauri');
 
 	grunt.registerMultiTask('testflow', 'UI testing with user flows', function() {
-
-		if(this.target === 'report'){
-			_.bind(showReport, this)();
-			return;
-		}
 
 		var time = Date.now();
 
@@ -56,6 +30,8 @@ module.exports = function(grunt) {
 		var bootstrapPath = path.join(__dirname, '..', 'bootstrap');
 		var casperPath = path.join( libsPath, 'casperjs.bat');
 		
+		var createReport = this.data.createReport;
+
 		var includes = path.resolve(this.data.includes || 'include');
 		var tests = path.resolve(this.data.tests || 'test') + '/';
 		var results = path.resolve(this.data.results || 'test-results');
@@ -77,20 +53,17 @@ module.exports = function(grunt) {
 		var args = [];
 		var done = this.async();
 		
-		var visualTestsPath = tests + '/visuals/';
+		var visualTestsPath = changeSlashes(tests + '/visuals/');
 
-		var dataPath = results + '/data/';
-		var xUnitPath = results + '/xunit/';
-		var debugPath = results + '/debug/';
-		var visualResultsPath = results + '/visuals/';
+		var dataPath = changeSlashes(results + '/data/');
+		var xUnitPath = changeSlashes(results + '/xunit/');
+		var debugPath = changeSlashes(results + '/debug/');
+		var reportPath = changeSlashes(results + '/report/');
+		var visualResultsPath = changeSlashes(results + '/visuals/');
 
 		var loggedErrors = [];
 		var failCount = 0;
 		var passCount = 0;
-
-		function changeSlashes(str){
-			return str.replace(/\\/g, '/');
-		}
 
 		function writeLog(filename, log, exit){
 			var path = results +  '/log/';
@@ -107,6 +80,13 @@ module.exports = function(grunt) {
 					done();
 				}
 			});
+		}
+
+		if(grunt.option('report')){
+			if(showReport(reportPath)){
+				done();
+			}
+			return;
 		}
 
 		grunt.file.expand(
@@ -195,6 +175,8 @@ module.exports = function(grunt) {
 				args: groupArgs,
 				opts: { stdio: false }
 			}, function(error, stdout, code) {
+
+				var mergedData;
 				
 				if(code !== 0 ){
 					console.log(('It broke, sorry. Threads aborted. Non-zero code ('+code+') returned.').red);
@@ -215,6 +197,17 @@ module.exports = function(grunt) {
 						('Completed '+(failCount+passCount) + ' tests in ' + Math.round((Date.now() - time) / 1000) + ' seconds. ') + 
 						(failCount + ' failed, ').bold.red + 
 						(passCount + ' passed. ').bold.green);
+
+					if(createReport){
+
+						mergedData = concatData(dataPath,visualTestsPath,visualResultsPath);
+
+						copyReportTemplate(
+							mergedData,
+							reportPath,
+							createReport
+						);
+					}
 
 					done();
 				} else {
@@ -258,11 +251,96 @@ module.exports = function(grunt) {
 				});
 			});
 
-			// process.on('exit', function() {
-			// 	child.kill();
-			// });
-
 		});
+
+		function concatData(dataPath, imagePath, imageResultPath){
+			// do concatination and transform here to allow parallelisation in PhantomFlow
+
+			var data = {};
+			var stringifiedData;
+
+			grunt.file.recurse(dataPath, function(abspath, rootdir, subdir, filename){
+				data[filename] = grunt.file.readJSON(abspath);
+			});
+
+			stringifiedData = JSON.stringify(data, function(k,v){
+				return dataTransform(k,v, imagePath, imageResultPath)
+			}, 2);
+
+			return stringifiedData;
+		}
+
+		function copyReportTemplate(data, dir, templateName){
+			templateName = typeof templateName == 'string' ? templateName : 'Dendrogram';
+
+			var templates = path.join(__dirname, '..', 'report_templates');
+			var template = path.join(templates, templateName);
+			var datafilename = path.join(dir, 'data.js');
+
+			if( grunt.file.isDir(template) ){
+				grunt.file.recurse(template, function(abspath, rootdir, subdir, filename){
+					var dest = path.join(dir,filename);
+
+					if(grunt.file.isFile(dest)){
+						grunt.file.delete(dest);
+					}
+					grunt.file.copy( abspath, dest );
+				});
+
+				if(grunt.file.isFile(datafilename)){
+					grunt.file.delete(datafilename);
+				}
+				grunt.file.write(datafilename, data);
+			}
+		}
+
+		function dataTransform(key, value, imagePath, imageResultPath){
+			var obj, ori, latest, fail;
+			if(key === 'screenshot'){
+
+				ori = path.join(imageResultPath, changeSlashes(value));
+
+				if(grunt.file.isFile(ori)){
+
+					latest = ori.replace(/.png$/, '.diff.png');
+					fail = ori.replace(/.png$/, '.fail.png');
+
+					obj = {
+						original: datauri(ori)
+					};
+
+					if(grunt.file.isFile(fail)){
+						obj.failure = datauri(fail);
+						if(grunt.file.isFile(latest)){
+							obj.latest = datauri(latest);
+						}
+					}
+
+					return obj;
+				} else {
+					console.log(("Expected file does not exist! "+ value).bold.yellow);
+					return null;
+				}
+			}
+
+			return value;
+		}
+
+		function showReport(dir){
+			if(grunt.file.isDir(dir)){
+				console.log("Please use ctrl+c to escape".bold.green);
+				connect(connect.static(dir)).listen(9001);
+				open('http://localhost:9001');
+				return false;
+			} else {
+				console.log("A report hasn't been generated.  Maybe you haven't set the createReport option?".bold.yellow);
+				return true;
+			}
+		}
+
+		function changeSlashes(str){
+			return path.normalize(str).replace(/\\/g, '/');
+		}
 
 	});
 };
