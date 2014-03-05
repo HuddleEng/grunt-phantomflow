@@ -158,6 +158,10 @@ module.exports = function(grunt) {
 			args.push('--novisuals='+dontDoVisuals);
 		}
 		
+		if(grunt.file.isDir(results)){
+			grunt.file.delete(results);
+		}
+		
 		console.log( 'Parallelising ' + files.length + ' test files on ' + threads + ' threads.\n');
 
 		_.forEach(fileGroups, function(files, index){
