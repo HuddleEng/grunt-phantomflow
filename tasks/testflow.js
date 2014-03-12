@@ -113,8 +113,6 @@ module.exports = function(grunt) {
 			return path.relative(tests, file);
 		});
 
-		console.log(files.length);
-
 		/*
 			Filter tests down to match specified string
 		*/
@@ -157,7 +155,7 @@ module.exports = function(grunt) {
 		if(dontDoVisuals){
 			args.push('--novisuals='+dontDoVisuals);
 		}
-		
+
 		if(grunt.file.isDir(results)){
 			grunt.file.delete(results);
 		}
@@ -264,7 +262,13 @@ module.exports = function(grunt) {
 			var stringifiedData;
 
 			grunt.file.recurse(dataPath, function(abspath, rootdir, subdir, filename){
-				data[filename] = grunt.file.readJSON(abspath);
+				var json = grunt.file.readJSON(abspath);
+
+				if(data[filename] && data[filename].children && json && json.children){
+					data[filename].children = data[filename].children.concat(json.children);
+				} else {
+					data[filename] = json;
+				}
 			});
 
 			stringifiedData = JSON.stringify(data, function(k,v){
