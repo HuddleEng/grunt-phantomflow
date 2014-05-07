@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 
 	grunt.loadTasks('tasks');
 
-	task('default', [/*'jshint', */'connect', 'testflow'] );
+	task('default', [/*'jshint', */'connect', 'phantomflow'] );
 
 	set('connect', {
 		example: {
@@ -29,14 +29,10 @@ module.exports = function(grunt) {
 		}
 	});
 
-	set('testflow', {
+	set('phantomflow', {
 		app: {
 			threads: 1
-		}/*,
-		report: {
-			url: 'http://localhost:'+port,
-			results: 'test-results/',
-		}*/
+		}
 	});
 
 
