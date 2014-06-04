@@ -1,6 +1,6 @@
 /*
- * grunt-testflow
- * homepage
+ * grunt-phantomflow
+ * https://github.com/Huddle/grunt-phantomflow
  *
  * Copyright (c) 2014 James Cryer / Huddle
  * Licensed under the The MIT License (MIT).

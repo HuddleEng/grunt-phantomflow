@@ -1,15 +1,15 @@
 {
   "name": "grunt-phantomflow",
   "version": "0.2.1",
-  "description": "UI Web testing with user flows",
-  "homepage": "https://github.com/Huddle/grunt-testflow",
+  "description": "UI Web testing with decision trees and PhantomCSS",
+  "homepage": "https://github.com/Huddle/grunt-phantomflow",
   "author": "",
   "bugs": {
-    "url": "https://github.com/Huddle/grunt-testflow/issues"
+    "url": "https://github.com/Huddle/grunt-phantomflow/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Huddle/grunt-testflow.git"
+    "url": "https://github.com/Huddle/grunt-phantomflow.git"
   },
   "keywords": [
     "gruntplugin",
