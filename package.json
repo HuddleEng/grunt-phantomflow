@@ -1,6 +1,6 @@
 {
-  "name": "grunt-testflow",
-  "version": "0.1.4",
+  "name": "grunt-phantomflow",
+  "version": "0.2.1",
   "description": "UI Web testing with user flows",
   "homepage": "https://github.com/Huddle/grunt-testflow",
   "author": "",
