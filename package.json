@@ -1,6 +1,6 @@
 {
   "name": "grunt-phantomflow",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "UI Web testing with decision trees and PhantomCSS",
   "homepage": "https://github.com/Huddle/grunt-phantomflow",
   "author": "",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "grunt-contrib-connect": "~0.5.0",
-    "phantomflow": "~0.3.0"
+    "phantomflow": "~0.4.0"
   },
   "license": "MIT"
 }
