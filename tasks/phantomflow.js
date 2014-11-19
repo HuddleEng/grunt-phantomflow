@@ -29,8 +29,8 @@ module.exports = function(grunt) {
 			return;
 		}
 
-		phantomflow.run(function(){
-			done();
+		phantomflow.run(function(code){
+			done(code == 0);
 		});	
 
 	});
