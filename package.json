@@ -1,42 +1,42 @@
 {
-  "name": "grunt-phantomflow",
-  "version": "0.2.2",
-  "description": "UI Web testing with decision trees and PhantomCSS",
-  "homepage": "https://github.com/Huddle/grunt-phantomflow",
-  "author": "",
-  "bugs": {
-    "url": "https://github.com/Huddle/grunt-phantomflow/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Huddle/grunt-phantomflow.git"
-  },
-  "keywords": [
-    "gruntplugin",
-    "ui",
-    "testing",
-    "visual",
-    "regression",
-    "phantomcss",
-    "phantomjs",
-    "casperjs",
-    "css",
-    "html",
-    "flow",
-    "user",
-    "tdd",
-    "bdd",
-    "assert",
-    "d3",
-    "visualisation"
-  ],
-  "main": "Gruntfile.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {
-    "grunt-contrib-connect": "~0.5.0",
-    "phantomflow": "~0.4.0"
-  },
-  "license": "MIT"
+	"name": "grunt-phantomflow",
+	"version": "0.2.3",
+	"description": "UI Web testing with decision trees and PhantomCSS",
+	"homepage": "https://github.com/Huddle/grunt-phantomflow",
+	"author": "",
+	"bugs": {
+		"url": "https://github.com/Huddle/grunt-phantomflow/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Huddle/grunt-phantomflow.git"
+	},
+	"keywords": [
+		"gruntplugin",
+		"ui",
+		"testing",
+		"visual",
+		"regression",
+		"phantomcss",
+		"phantomjs",
+		"casperjs",
+		"css",
+		"html",
+		"flow",
+		"user",
+		"tdd",
+		"bdd",
+		"assert",
+		"d3",
+		"visualisation"
+	],
+	"main": "Gruntfile.js",
+	"directories": {
+		"test": "test"
+	},
+	"dependencies": {
+		"grunt-contrib-connect": "~0.5.0",
+		"phantomflow": "~0.4.0"
+	},
+	"license": "MIT"
 }
