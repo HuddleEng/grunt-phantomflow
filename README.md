@@ -20,15 +20,63 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-phantomflow');
 ```
 
-### Command line parameters
+### Setup
 
-All command line parameters can be used in conjuntion with each other.
+
+```js
+grunt.config.set('phantomflow', {
+	app: {
+		/*
+			How many threads would you like to parallelise on?
+			Default value is 4
+		*/
+		threads: 4
+		
+		/*
+			Should a report/visualisation be generated after
+			the test run? Default value is false
+		*/
+		createReport: false,
+		
+		/*
+			Do you have scripts to include?
+			Default value is ./include
+		*/
+		includes: './include',
+		
+		/*
+			Where do the tests live?
+			Default value is ./test
+		*/
+		tests: './test',
+		
+		/*
+			Where should the results go?
+			Default value is ./test-results
+		*/
+		results: './test-results',
+		
+		/*
+			Hide elements in the page
+		*/
+		hideElements: ['img', 'input']
+	}
+});
+```
+
+### Command line parameters
 
 #### Running a specific test
 
-If you're working on a test you can use the `test` parameter to run a specific test file. The value can be a substring of the file name.
+If you're working on a test you can use the `test` parameter to run a specific test file. The value can be a substring of the file name. Please note that test filenames should follow the *.test.js naming convention.
 
 `grunt phantomflow:websitetests --test=mytestfile`
+
+#### Reporting
+
+To show the PhantomFlow visualisation use the 'report' param. You need to have previously generated a report by setting the createReport option to true. Tests will not be executed when the 'report' param is used. The previously generated visualisation will open in your browser.
+
+`grunt phantomflow:websitetests --report`
 
 #### Multithreading
 
