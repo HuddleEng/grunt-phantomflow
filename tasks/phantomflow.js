@@ -11,7 +11,9 @@ module.exports = function ( grunt ) {
 		var phantomflow = require( 'phantomflow' ).init( {
 			test: grunt.option( 'test' ), // to run a specific test
 			debug: grunt.option( 'debug' ),
+			casperArgs: this.data.casperArgs || [],
 			createReport: this.data.createReport,
+			reports: this.data.reports,
 			includes: this.data.includes,
 			tests: this.data.tests,
 			results: this.data.results,
