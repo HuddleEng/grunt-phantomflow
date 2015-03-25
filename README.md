@@ -31,12 +31,28 @@ grunt.config.set('phantomflow', {
 			Default value is 4
 		*/
 		threads: 4
-		
+
+		/*
+			Any command line options to be passed down to casper?
+			Example: ['--cookies-file=testcookies.txt']
+			Default value is []
+		*/
+		casperArgs: [],
+
 		/*
 			Should a report/visualisation be generated after
 			the test run? Default value is false
 		*/
 		createReport: false,
+
+		/*
+			Should the report output live somewhere else, e.g. for
+			proxying through a real webserver?
+			Example: '../visualtest/htdocs'
+			Default value is undefined.
+			If unset, the default set by PhantomFlow will be used.
+		*/
+		reports: null,
 		
 		/*
 			Do you have scripts to include?
