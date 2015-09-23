@@ -22,6 +22,9 @@ module.exports = function ( grunt ) {
 			earlyExit: grunt.option( 'earlyexit' ),
 			novisuals: grunt.option( 'novisuals' ),
 			hideElements: this.data.hideElements || [],
+			remoteDebug: this.data.remoteDebug,
+			remoteDebugAutoStart: this.data.remoteDebugAutoStart,
+			remoteDebugPort: this.data.remoteDebugPort
 		} );
 
 		var done = this.async();
