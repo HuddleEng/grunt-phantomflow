@@ -112,6 +112,20 @@ By default phantomflow will not abort when a test fails, set the `earlyexit` par
 
 `grunt phantomflow:websitetests --earlyexit=true`
 
+#### Remote debugging using Web Inspector.
+
+PhantomJS supports [remote debugging](https://github.com/ariya/phantomjs/wiki/Troubleshooting#remote-debugging). The following grunt options allow you to start phantom with the correct options.
+
+```
+grunt.config.set('phantomflow', {
+	app: {
+		remoteDebug: true, // default false
+		remoteDebugAutoStart: false, // default false,
+		remoteDebugPort: 9000 // default 9000
+	}
+});
+```
+
 ### Overview
 In your project's Gruntfile, use either `grunt.initConfig( {} )` or `grunt.config.set( 'phantomflow', {} )`.
 
