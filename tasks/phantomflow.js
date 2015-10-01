@@ -4,28 +4,22 @@
  * Licensed under The MIT License (MIT).
  */
 
+var _ = require('lodash');
+
 module.exports = function ( grunt ) {
 
 	grunt.registerMultiTask( 'phantomflow', 'UI testing with decision trees', function () {
 
-		var phantomflow = require( 'phantomflow' ).init( {
-			test: grunt.option( 'test' ), // to run a specific test
+		var overrides = {
+			test: grunt.option( 'test' ),
 			debug: grunt.option( 'debug' ),
-			casperArgs: this.data.casperArgs || [],
-			createReport: this.data.createReport,
-			reports: this.data.reports,
-			includes: this.data.includes,
-			tests: this.data.tests,
-			results: this.data.results,
-			threads: grunt.option('threads') || this.data.threads,
-			mismatchTolerance: grunt.option('mismatchTolerance') || this.data.mismatchTolerance,
+			threads: grunt.option('threads'),
+			mismatchTolerance: grunt.option('mismatchTolerance'),
 			earlyExit: grunt.option( 'earlyexit' ),
 			novisuals: grunt.option( 'novisuals' ),
-			hideElements: this.data.hideElements || [],
-			remoteDebug: this.data.remoteDebug,
-			remoteDebugAutoStart: this.data.remoteDebugAutoStart,
-			remoteDebugPort: this.data.remoteDebugPort
-		} );
+		};
+
+		var phantomflow = require( 'phantomflow' ).init( _.defaults( overrides, this.data ) );
 
 		var done = this.async();
 
