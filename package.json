@@ -1,6 +1,6 @@
 {
 	"name": "grunt-phantomflow",
-	"version": "0.2.5",
+	"version": "0.2.6",
 	"description": "UI Web testing with decision trees and PhantomCSS",
 	"homepage": "https://github.com/Huddle/grunt-phantomflow",
 	"author": "",
