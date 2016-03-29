@@ -30,7 +30,7 @@ grunt.config.set('phantomflow', {
 			How many threads would you like to parallelise on?
 			Default value is 4
 		*/
-		threads: 4
+		threads: 4,
 
 		/*
 			Any command line options to be passed down to casper?
